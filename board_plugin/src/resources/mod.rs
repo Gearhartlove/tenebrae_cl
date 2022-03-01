@@ -1,2 +1,2 @@
-pub mod tile;
-pub mod tile_map;
+pub(crate) mod tile;
+pub(crate) mod tile_map;

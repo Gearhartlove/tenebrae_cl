@@ -22,6 +22,18 @@ impl Add for Coordinates {
     }
 }
 
+// unsure why we can implement this trait multiple times; is it because the "generic" part
+// of the trait is different?
+impl Add<(i8, i8)> for Coordinates {
+    type Output = Self;
+
+    fn add(self, (x,y): (i8, i8)) -> Self::Output {
+        let x = ((self.x as i16) + x as i16) as u16;
+        let y = ((self.y as i16) + y as i16) as u16;
+        Self { x, y }
+    }
+}
+
 impl Sub for Coordinates {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use core::default::Default as Def;
+use board_plugin::BoardPlugin;
 
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::WorldInspectorPlugin;

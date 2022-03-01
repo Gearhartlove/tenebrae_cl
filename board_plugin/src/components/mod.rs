@@ -1,1 +1,3 @@
-pub mod coordinates;
+mod coordinates;
+
+pub use coordinates::Coordinates;
