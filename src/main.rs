@@ -17,7 +17,8 @@ fn main() {
         ..Def::default()
     })
         // Bevy default plugins
-        .add_plugins(DefaultPlugins);
+        .add_plugins(DefaultPlugins)
+        .add_plugin(BoardPlugin);
 
     #[cfg(feature = "debug")]
     // Debug hierarchy inspector

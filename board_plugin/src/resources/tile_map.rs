@@ -1,7 +1,6 @@
 use crate::resources:: tile::Tile;
 use std::ops::{Deref, DerefMut};
-use crate::components::coordinates;
-use crate::coordinates::Coordinates;
+use crate::components::Coordinates;
 use rand::{thread_rng, Rng};
 
 /// Base tile map
@@ -34,7 +33,7 @@ impl TileMap {
             "Map ({}, {}) with {} bombs:\n",
             self.width, self.height, self.bomb_count
         );
-        let line: String = (0..=(self.width + 1)).inter_iter().map(|_| '-').collect();
+        let line: String = (0..=(self.width + 1)).into_iter().map(|_| '-').collect();
         buffer = format!("{}{}\n", buffer, line);
         for line in self.iter().rev() {
             buffer = format!("{}|", buffer);

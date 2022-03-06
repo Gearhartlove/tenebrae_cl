@@ -30,7 +30,7 @@ impl Tile {
                     3 => "3".yellow(),
                     _ => v.to_string().red(),
                 },
-                Tile::Empty => " ".normal,
+                Tile::Empty => " ".normal(),
             }
         )
     }
