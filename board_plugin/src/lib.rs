@@ -103,7 +103,7 @@ impl BoardPlugin {
                         ..Default::default()
                     })
                     .insert(Name::new("Background"));
-                Self::spawn_tiles(
+                spawn_tiles(
                     parent,
                     &tile_map,
                     tile_size,
@@ -205,16 +205,16 @@ fn spawn_tiles (
                                 ..Default::default()
                             },
                             transform: Transform::from_xyz(0., 0., 1.),
-                            texture: bomb_image.clonse(),
+                            texture: bomb_image.clone(),
                             ..Default::default()
                         });
-                    })
+                    });
                 }
                 // If the tiles is a bomb neighbour we add the matching component and a tezt child
                 Tile::BombNeighbor(v) => {
                     cmd.insert(BombNeighbor { count: *v });
                     cmd.with_children(|parent| {
-                        parent.spawn_bundle(Self::bomb_count_text_bundle(
+                        parent.spawn_bundle(bomb_count_text_bundle(
                             *v,
                             font.clone(),
                             size - padding,
