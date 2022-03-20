@@ -36,8 +36,8 @@ impl BoardPlugin {
         window: Option<Res<WindowDescriptor>>,
         asset_server: Res<AssetServer>, // The AssetServer Resource > allows loading files from the assets folder
     ) {
-        let font = asset_server.load("fonts/pixeled.ttf");
-        let bomb_image = asset_server.load("sprites/bomb.png");
+        let font = asset_server.load("fonts/JetBrainsMono-Regular.ttf");
+        let bomb_image = asset_server.load("sprites/bomb_emoji.png");
 
         let mut tile_map = TileMap::empty(20, 20);
         tile_map.set_bombs(40);
