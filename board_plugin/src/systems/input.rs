@@ -13,7 +13,7 @@ pub fn input_handling (
     let window = windows.get_primary().unwrap();
 
     for event in button_evr.iter() {
-        if let ElementState::Presed = event.state {
+        if let ElementState::Pressed = event.state {
             let position = window.cursor_position();
             if let Some(pos) = position {
                 // event.button errors?

@@ -16,12 +16,14 @@ use crate::bounds::Bounds2;
 use crate::resources::tile::Tile;
 use bevy::math::Vec3Swizzles;
 use crate::resources::board::Board;
+use crate::systems::input::input_handling;
 
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(Self::create_board);
+        app.add_startup_system(input_handling);
         log::info!("Loaded Board Plugin");
         #[cfg(feature = "debug")]
             {
@@ -89,14 +91,7 @@ impl BoardPlugin {
             BoardPosition::Costume(p) => p,
         };
 
-        commands.insert_resource(Board {
-            tile_map,
-            bounds: Bounds2 {
-                position: board_position.xy(),
-                size: board_size,
-            },
-            tile_size
-        });
+
 
         commands
             .spawn()
@@ -127,6 +122,15 @@ impl BoardPlugin {
                     font,
                 );
             });
+
+        commands.insert_resource(Board {
+            tile_map,
+            bounds: Bounds2 {
+                position: board_position.xy(),
+                size: board_size,
+            },
+            tile_size
+        });
     }
 
 }
