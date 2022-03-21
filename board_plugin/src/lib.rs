@@ -1,5 +1,7 @@
 pub mod components;
 pub mod resources;
+mod bounds;
+mod systems;
 
 use bevy::log;
 use bevy::prelude::*;
@@ -10,7 +12,10 @@ use resources::BoardOptions;
 use resources::TileSize;
 use resources::BoardPosition;
 use components::*;
+use crate::bounds::Bounds2;
 use crate::resources::tile::Tile;
+use bevy::math::Vec3Swizzles;
+use crate::resources::board::Board;
 
 pub struct BoardPlugin;
 
@@ -83,6 +88,15 @@ impl BoardPlugin {
             }
             BoardPosition::Costume(p) => p,
         };
+
+        commands.insert_resource(Board {
+            tile_map,
+            bounds: Bounds2 {
+                position: board_position.xy(),
+                size: board_size,
+            },
+            tile_size
+        });
 
         commands
             .spawn()
