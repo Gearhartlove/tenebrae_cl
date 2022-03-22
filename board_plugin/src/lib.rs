@@ -17,6 +17,7 @@ use crate::resources::tile::Tile;
 use bevy::math::Vec3Swizzles;
 use crate::resources::board::Board;
 use crate::systems::input::input_handling;
+use bevy::utils::{AHashExt, HashMap};
 
 pub struct BoardPlugin;
 
@@ -188,6 +189,8 @@ fn spawn_tiles (
     color: Color,
     bomb_image: Handle<Image>,
     font: Handle<Font>,
+    covered_tile_color: Color,
+    covered_tiles: &mut HashMap<Coordinates, Entity>,
 ) {
     // Tiles
     for (y, line) in tile_map.iter().enumerate() {
@@ -212,6 +215,23 @@ fn spawn_tiles (
             })
                 .insert(Name::new(format!("Tile ({}, {})", x, y)))
                 .insert(coordinates);
+
+            // Add the cover sprites ?
+            cmd.with_children(|parent| {
+                let entity = parent
+                    .spawn_bundle(SpriteBundle {
+                        sprite: Sprite {
+                            custom_size: Some(Vec2::splat(size - padding)),
+                            color: covered_tile_color,
+                            ..Default::default()
+                        },
+                        transform: Transform::from_xyz(0., 0., 2.),
+                        ..Default::default()
+                    })
+                    .insert(Name::new("Tile Cover"))
+                    .id();
+                covered_tiles.insert(coordinates, entity);
+            });
 
             match tile {
                 Tile::Bomb => {
