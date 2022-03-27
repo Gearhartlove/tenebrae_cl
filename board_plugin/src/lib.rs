@@ -2,10 +2,10 @@ pub mod components;
 pub mod resources;
 mod bounds;
 mod systems;
+mod events;
 
 use bevy::log;
 use bevy::prelude::*;
-use bevy::reflect::List;
 use bevy_inspector_egui::RegisterInspectable;
 use resources::tile_map::TileMap;
 use resources::BoardOptions;
@@ -16,15 +16,20 @@ use crate::bounds::Bounds2;
 use crate::resources::tile::Tile;
 use bevy::math::Vec3Swizzles;
 use crate::resources::board::Board;
-use crate::systems::input::input_handling;
 use bevy::utils::{AHashExt, HashMap};
+use crate::events::*;
+use crate::systems::input::input_handling;
+use crate::systems::uncover::{trigger_event_handler, uncover_tiles};
 
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(Self::create_board)
-            .add_system(input_handling);
+            .add_system(input_handling)
+            .add_system(trigger_event_handler)
+            .add_system(uncover_tiles)
+            .add_event::<TileTriggerEvent>();
         log::info!("Loaded Board Plugin");
         #[cfg(feature = "debug")]
             {
@@ -92,7 +97,8 @@ impl BoardPlugin {
             BoardPosition::Costume(p) => p,
         };
 
-
+        let mut covered_tiles = HashMap::with_capacity((tile_map.width()
+            * tile_map.height()).into());
 
         commands
             .spawn()
@@ -102,6 +108,7 @@ impl BoardPlugin {
             .with_children(|parent| {
                 // We spawn the board background sprite at the center of the board, since the sprite
                 // pivot is centered
+
                 parent
                     .spawn_bundle(SpriteBundle {
                         sprite: Sprite {
@@ -121,6 +128,8 @@ impl BoardPlugin {
                     Color::GRAY,
                     bomb_image,
                     font,
+                    Color::DARK_GRAY,
+                    &mut covered_tiles,
                 );
             });
 
@@ -130,7 +139,8 @@ impl BoardPlugin {
                 position: board_position.xy(),
                 size: board_size,
             },
-            tile_size
+            tile_size,
+            covered_tiles,
         });
     }
 
