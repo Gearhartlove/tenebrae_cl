@@ -39,7 +39,7 @@ pub fn uncover_tiles(
         };
 
         match board.try_uncover_tile(coords) {
-            None => ("Tried to uncover an already uncovered tile"),
+            None => log::debug!("Tried to uncover an already uncovered tile"),
             Some(e) => log::debug!("Uncovered tile {} (entity: {:?})", coords, e),
         }
         if bomb.is_some() {

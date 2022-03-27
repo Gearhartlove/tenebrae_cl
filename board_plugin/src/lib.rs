@@ -6,7 +6,6 @@ mod events;
 
 use bevy::log;
 use bevy::prelude::*;
-use bevy_inspector_egui::RegisterInspectable;
 use resources::tile_map::TileMap;
 use resources::BoardOptions;
 use resources::TileSize;
