@@ -1,7 +1,7 @@
-use std::collections::HashMap;
 use crate::bounds::Bounds2;
 use crate::{Coordinates, TileMap};
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 
 #[derive(Debug)]
 pub struct Board {

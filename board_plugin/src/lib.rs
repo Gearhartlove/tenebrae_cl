@@ -19,6 +19,7 @@ use bevy::utils::{AHashExt, HashMap};
 use crate::events::*;
 use crate::systems::input::input_handling;
 use crate::systems::uncover::{trigger_event_handler, uncover_tiles};
+use bevy_inspector_egui::RegisterInspectable;
 
 pub struct BoardPlugin;
 
@@ -98,6 +99,7 @@ impl BoardPlugin {
 
         let mut covered_tiles = HashMap::with_capacity((tile_map.width()
             * tile_map.height()).into());
+
 
         commands
             .spawn()
