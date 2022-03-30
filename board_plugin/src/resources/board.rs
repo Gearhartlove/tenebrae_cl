@@ -10,6 +10,7 @@ pub struct Board {
     pub tile_size: f32,
     // every time we uncover a tile we will remove the entity from our map
     pub covered_tiles: HashMap<Coordinates, Entity>,
+    pub entity: Entity,
 }
 
 impl Board {
