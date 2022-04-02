@@ -11,7 +11,6 @@ use crate::CursorIcon::Default;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
     InGame,
-    Paused,
     Out,
 }
 
@@ -49,8 +48,9 @@ fn main() {
         .run();
 }
 
-fn state_handler(mut state: ResMut<State<AppState>>, keys: Res<Input<KeyCode>>) {
-    let mut c_pressed = || {
+
+fn state_handler(mut game_state: ResMut<State<AppState>>, keys: Res<Input<KeyCode>>) {
+    let mut set_clear_state = |state: &mut ResMut<State<AppState>>| {
         log::debug!("clearing game");
         if state.current() == &AppState::InGame {
             log::info!("clearing game");
@@ -58,30 +58,22 @@ fn state_handler(mut state: ResMut<State<AppState>>, keys: Res<Input<KeyCode>>) 
         }
     };
 
-    if keys.just_pressed(KeyCode::C) {
-        c_pressed();
-    }
-
-    if keys.just_pressed(KeyCode::G) {
+    let mut set_gen_state = |state: &mut ResMut<State<AppState>>| {
         log::debug!("loading detected");
-        c_pressed();
         if state.current() == &AppState::Out {
             log::info!("loading game");
             state.set(AppState::InGame).unwrap();
         }
+    };
+
+    //Generate
+    if keys.just_pressed(KeyCode::G) {
+        set_clear_state(&mut game_state);
     }
-    if keys.just_pressed(KeyCode::Escape) {
-        log::debug!("pausing game");
-        if state.current() == &AppState::InGame {
-            log::info!("pausing game");
-            // RFC: how do I pause the game?
-            state.set(AppState::Paused).unwrap();
-        }
-        else if state.current() == &AppState::Out {
-            log::info!("unpausing game");
-            state.set(AppState::InGame).unwrap();
-        }
-    }
+    // game_state needs to leave the scope to exit . . . kind of jank xD
+    set_gen_state(&mut game_state);
+
+    // TODO: implement pause
 }
 
 fn camera_setup(mut commands: Commands) {
