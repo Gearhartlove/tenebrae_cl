@@ -21,6 +21,7 @@ use crate::systems::input::input_handling;
 use crate::systems::uncover::{trigger_event_handler, uncover_tiles};
 use bevy_inspector_egui::RegisterInspectable;
 use bevy::ecs::schedule::StateData;
+use crate::resources::BoardAssets;
 
 pub struct BoardPlugin<T> {
     pub running_state: T,
@@ -70,12 +71,9 @@ impl<T> BoardPlugin<T> {
     pub fn create_board(
         mut commands: Commands,
         board_options: Option<Res<BoardOptions>>,
+        board_assets: Res<BoardAssets>,
         window: Option<Res<WindowDescriptor>>,
-        asset_server: Res<AssetServer>, // The AssetServer Resource > allows loading files from the assets folder
     ) {
-        let font = asset_server.load("fonts/JetBrainsMono-Regular.ttf");
-        let bomb_image = asset_server.load("sprites/bomb_emoji.png");
-
         let mut tile_map = TileMap::empty(20, 20);
         tile_map.set_bombs(40);
         #[cfg(feature = "debug")]
@@ -137,10 +135,11 @@ impl<T> BoardPlugin<T> {
                 parent
                     .spawn_bundle(SpriteBundle {
                         sprite: Sprite {
-                            color: Color::WHITE,
+                            color: board_assets.board_material.color,
                             custom_size: Some(board_size),
                             ..Default::default()
                         },
+                        texture: board_assets.board_material.texture.clone(),
                         transform: Transform::from_xyz(board_size.x / 2., board_size.y / 2., 0.),
                         ..Default::default()
                     })
@@ -150,10 +149,7 @@ impl<T> BoardPlugin<T> {
                     &tile_map,
                     tile_size,
                     options.tile_padding,
-                    Color::GRAY,
-                    bomb_image,
-                    font,
-                    Color::DARK_GRAY,
+                    &board_assets,
                     &mut covered_tiles,
                     &mut safe_start
                 );
@@ -198,25 +194,16 @@ fn adaptive_tile_size(
 }
 
 /// Generates the bomb counter text 2D Bundle for a given value
-fn bomb_count_text_bundle(count: u8, font: Handle<Font>, size: f32) -> Text2dBundle {
-    let (text, color) = (
-        count.to_string(),
-            match count {
-                1 => Color::WHITE,
-                2 => Color::GREEN,
-                3 => Color::YELLOW,
-                4 => Color::ORANGE,
-                _ => Color::PURPLE,
-            }
-        );
+fn bomb_count_text_bundle(count: u8, board_assets: &BoardAssets, size: f32) -> Text2dBundle {
+    let color = board_assets.bomb_counter_color(count);
     // Generate a text bundle
     Text2dBundle {
         text: Text {
             sections: vec![TextSection {
-                value: text,
+                value: count.to_string(),
                 style: TextStyle {
                     color,
-                    font,
+                    font: board_assets.bomb_counter_font.clone(),
                     font_size: size,
                 },
             }],
@@ -236,10 +223,7 @@ fn spawn_tiles (
     tile_map: &TileMap,
     size: f32,
     padding: f32,
-    color: Color,
-    bomb_image: Handle<Image>,
-    font: Handle<Font>,
-    covered_tile_color: Color,
+    board_assets: &BoardAssets,
     covered_tiles: &mut HashMap<Coordinates, Entity>,
     safe_start_entity: &mut Option<Entity>,
 ) {
@@ -253,7 +237,7 @@ fn spawn_tiles (
             let mut cmd = parent.spawn();
             cmd.insert_bundle(SpriteBundle {
                 sprite: Sprite {
-                    color,
+                    color: board_assets.tile_material.color,
                     custom_size: Some(Vec2::splat(size - padding)),
                     ..Default::default()
                 },
@@ -262,6 +246,7 @@ fn spawn_tiles (
                     (y as f32 * size) + (size / 2.),
                     1.,
                 ),
+                texture: board_assets.tile_material.texture.clone(),
                 ..Default::default()
             })
                 .insert(Name::new(format!("Tile ({}, {})", x, y)))
@@ -273,10 +258,11 @@ fn spawn_tiles (
                     .spawn_bundle(SpriteBundle {
                         sprite: Sprite {
                             custom_size: Some(Vec2::splat(size - padding)),
-                            color: covered_tile_color,
+                            color: board_assets.covered_tile_material.color,
                             ..Default::default()
                         },
                         transform: Transform::from_xyz(0., 0., 2.),
+                        texture: board_assets.covered_tile_material.texture.clone(),
                         ..Default::default()
                     })
                     .insert(Name::new("Tile Cover"))
@@ -297,7 +283,8 @@ fn spawn_tiles (
                                 ..Default::default()
                             },
                             transform: Transform::from_xyz(0., 0., 1.),
-                            texture: bomb_image.clone(),
+                            //RFC?
+                            texture: board_assets.bomb_material.texture.clone(),
                             ..Default::default()
                         });
                     });
@@ -308,7 +295,7 @@ fn spawn_tiles (
                     cmd.with_children(|parent| {
                         parent.spawn_bundle(bomb_count_text_bundle(
                             *v,
-                            font.clone(),
+                            board_assets,
                             size - padding,
                         ));
                     });

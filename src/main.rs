@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use core::default::Default as Def;
 use board_plugin::BoardPlugin;
-use board_plugin::resources::BoardOptions;
+use board_plugin::resources::{BoardAssets, BoardOptions, SpriteMaterial};
 use bevy::log;
 
 #[cfg(feature = "debug")]
@@ -26,24 +26,18 @@ fn main() {
         // Bevy default plugins
         .add_plugins(DefaultPlugins);
     #[cfg(feature = "debug")]
-    // Debug hierarchy inspector
-    app.add_plugin(WorldInspectorPlugin::new());
-    // Board plugin options
-    app.insert_resource(BoardOptions {
-        safe_start: true,
-        map_size: (20, 20),
-        bomb_count: 40,
-        tile_padding: 3.0,
-        ..Def::default()
-    })
+        // Debug hierarchy inspector
+        app.add_plugin(WorldInspectorPlugin::new())
+        // Board plugin options
         // is this the right place to put this?
-        .add_state(AppState::InGame)
+        .add_state(AppState::Out)
         .add_plugin(BoardPlugin {
             running_state: AppState::InGame,
         })
         .add_system(state_handler)
         // Startup system (cameras)
         .add_startup_system(camera_setup)
+        .add_startup_system(setup_board)
         // Run the app
         .run();
 }
@@ -79,4 +73,47 @@ fn state_handler(mut game_state: ResMut<State<AppState>>, keys: Res<Input<KeyCod
 fn camera_setup(mut commands: Commands) {
     // 2D orthographic camera
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+
+fn setup_board(
+    mut  commands: Commands,
+    mut state: ResMut<State<AppState>>,
+    asset_server: Res<AssetServer>,
+) {
+    // Board plugin options
+    commands.insert_resource(BoardOptions {
+        map_size: (20, 20),
+        bomb_count: 40,
+        tile_padding: 1.,
+        safe_start: true,
+        ..Def::default()
+    });
+    // Board assets
+    commands.insert_resource(BoardAssets {
+        label: "Default".to_string(),
+        board_material: SpriteMaterial {
+            color: Color::WHITE,
+            ..Def::default()
+        },
+        tile_material: SpriteMaterial {
+            color: Color::DARK_GRAY,
+            ..Def::default()
+        },
+        covered_tile_material: SpriteMaterial {
+            color: Color::GRAY,
+            ..Def::default()
+        },
+        bomb_counter_font: asset_server.load("fonts/JetBrainsMono-Regular.ttf"),
+        bomb_counter_colors: BoardAssets::default_colors(),
+        flag_material: SpriteMaterial {
+            texture: asset_server.load("sprites/flag.png"),
+            color: Color::WHITE,
+        },
+        bomb_material: SpriteMaterial {
+            texture: asset_server.load("sprites/bomb_emoji.png"),
+            color: Color::WHITE,
+        }
+    });
+    // Plugin Activation
+    state.set(AppState::InGame).unwrap();
 }
